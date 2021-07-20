@@ -8,15 +8,18 @@ using UnityEngine.Rendering.PostProcessing;
 using HarmonyLib;
 using VRC;
 using Il2CppSystem;
+using VRCMGU.API;
+
+//[assembly: MelonAdditionalDependencies("Unchained.Core")]
 
 namespace DontOverrenderMyMenuV2
 {
     public static class ModInfo
     {
         public const string Name = "DontOverrenderMyMenuV2";
-        public const string Author = "Tobo/Topi";
-        public const string Version = "0.2.0";
-        public const string DownloadLink = "https://github.com/not-tobo";
+        public const string Author = "Tobo/Topi [origanal code by Ben]";
+        public const string Version = "0.2.1";
+        public const string DownloadLink = "https://github.com/not-tobo/DontOverrenderMyMenuV2";
     }
 
     public class DontOverrenderMyMenuV2 : MelonMod
@@ -24,6 +27,7 @@ namespace DontOverrenderMyMenuV2
         public override void OnApplicationStart() // Called after every mod is loaded into the current Mono Domain
         {
             MelonCoroutines.Start(StartUiManagerInitIEnumerator());
+            MelonLogger.Msg("by Tobo/Topi");
         }
 
         private IEnumerator StartUiManagerInitIEnumerator()
@@ -31,28 +35,52 @@ namespace DontOverrenderMyMenuV2
             while (VRCUiManager.prop_VRCUiManager_0 == null)
                 yield return null;
 
-             VRChat_OnUiManagerInit();
+            try
+            {
+                VRCUI();
+            }
+            catch
+            {
+                MelonLogger.Msg("Unchained-Core not found!");
+                MelonLogger.Msg("please get Unchained-core from: https://github.com/WTFBlaze/Unchained-Core");
+                //unchained = false;
+            };
+            VRChat_OnUiManagerInit();
         }
 
-        public override void OnSceneWasLoaded(int buildIndex, string sceneName)  // Called when a scene is initialized
+        public void VRCUI()
         {
-            
-        }
+            MelonLogger.Msg("Unchained Menu Initializing...");
 
-        //public void VRCUI()
-        //{
-        //    var menu = new VRCMGU.API.QMNestedButton("ShortcutMenu", 0, 0, "", "");
-        //    VRCMGU.UI.AddToUnchainedMenu(menu, "Test Mod", "Test mod lmfao");
-        //}
+            QMNestedButton TabButton = new QMNestedButton("ShortcutMenu", 0, 0, "nope", "");
+            VRCMGU.UI.AddToUnchainedMenu(TabButton, "Menu Overrenderer V2", "DontOverrenderMyMenuV2");
+
+            var labeltogbtn = new QMToggleButton(TabButton, 1, 0, "Overrender ON", delegate
+            {
+                overrenderEnabled = true;
+                DontOverrenderMyMenuV2.menuCameraClone.SetActive(DontOverrenderMyMenuV2.overrenderEnabled);
+                DontOverrenderMyMenuV2.originalCamera.cullingMask = (DontOverrenderMyMenuV2.overrenderEnabled ? DontOverrenderMyMenuV2.newCullingMask : DontOverrenderMyMenuV2.originalCullingMask);
+            }, "Overrender OFF", delegate
+            {
+                overrenderEnabled = false;
+                DontOverrenderMyMenuV2.menuCameraClone.SetActive(DontOverrenderMyMenuV2.overrenderEnabled);
+                DontOverrenderMyMenuV2.originalCamera.cullingMask = (DontOverrenderMyMenuV2.overrenderEnabled ? DontOverrenderMyMenuV2.newCullingMask : DontOverrenderMyMenuV2.originalCullingMask);
+            }, "Toggle for overrendering the Menu");
+
+            MelonLogger.Msg("Unchained Menu Initialized!");
+            //unchained = true;
+            return;
+        }
 
         public static void VRChat_OnUiManagerInit()  // (VRChat only) Called if the VRCUiManager component has been initialized this frame.This method is called at the end of the frame, before OnUpdate.
         {
-            //MelonPreferences_Category melonPreferences_Category = MelonPreferences.CreateCategory("DontOverrenderMyMenuV2", "DontOverrenderMyMenuV2");
-            //MelonPreferences_Category.CreateEntry<bool>("overrenderEnabled", true, "DontOverrenderMyMenu", false);
+            //if (unchained == false)
+            //{
+            //    MelonPreferences.CreateCategory(settingsCategory, "DontOverrenderMyMenuV2");
+            //    MelonPreferences.CreateEntry<bool>(settingsCategory, "overrenderEnabled", false, "DontOverrenderMyMenuV2");
+            //}
 
-            MelonPreferences.CreateCategory(settingsCategory, "DontOverrenderMyMenuV2");
-            MelonPreferences.CreateEntry<bool>(settingsCategory, "overrenderEnabled", false, "DontOverrenderMyMenuV2");
-            MelonLogger.Msg("by Tobo loaded");
+            MelonLogger.Msg("Overrenderer Initializing...");
 
             VRCVrCamera field_Private_Static_VRCVrCamera_ = VRCVrCamera.field_Private_Static_VRCVrCamera_0;
             bool flag = !field_Private_Static_VRCVrCamera_;
@@ -104,6 +132,8 @@ namespace DontOverrenderMyMenuV2
                     DontOverrenderMyMenuV2.overrenderEnabled = MelonPreferences.GetEntryValue<bool>("DontOverrenderMyMenuV2", "overrenderEnabled");
                     DontOverrenderMyMenuV2.menuCameraClone.SetActive(DontOverrenderMyMenuV2.overrenderEnabled);
                     DontOverrenderMyMenuV2.originalCamera.cullingMask = (DontOverrenderMyMenuV2.overrenderEnabled ? DontOverrenderMyMenuV2.newCullingMask : DontOverrenderMyMenuV2.originalCullingMask);
+
+                    MelonLogger.Msg("Overrenderer Initialized!");
                 }
             }
         }
@@ -125,16 +155,16 @@ namespace DontOverrenderMyMenuV2
 
         public override void OnPreferencesLoaded() // Called when mod preferences are loaded.
         {
-            DontOverrenderMyMenuV2.overrenderEnabled = MelonPreferences.GetEntryValue<bool>("DontOverrenderMyMenuV2", "overrenderEnabled");
-            DontOverrenderMyMenuV2.menuCameraClone.SetActive(DontOverrenderMyMenuV2.overrenderEnabled);
-            DontOverrenderMyMenuV2.originalCamera.cullingMask = (DontOverrenderMyMenuV2.overrenderEnabled ? DontOverrenderMyMenuV2.newCullingMask : DontOverrenderMyMenuV2.originalCullingMask);
+            //DontOverrenderMyMenuV2.overrenderEnabled = MelonPreferences.GetEntryValue<bool>("DontOverrenderMyMenuV2", "overrenderEnabled");
+            //DontOverrenderMyMenuV2.menuCameraClone.SetActive(DontOverrenderMyMenuV2.overrenderEnabled);
+            //DontOverrenderMyMenuV2.originalCamera.cullingMask = (DontOverrenderMyMenuV2.overrenderEnabled ? DontOverrenderMyMenuV2.newCullingMask : DontOverrenderMyMenuV2.originalCullingMask);
         }
 
         public override void OnPreferencesSaved() // Called when a mod calls MelonLoader.MelonPreferences.Save(), or when the application quits.
         {
-            DontOverrenderMyMenuV2.overrenderEnabled = MelonPreferences.GetEntryValue<bool>("DontOverrenderMyMenuV2", "overrenderEnabled");
-            DontOverrenderMyMenuV2.menuCameraClone.SetActive(DontOverrenderMyMenuV2.overrenderEnabled);
-            DontOverrenderMyMenuV2.originalCamera.cullingMask = (DontOverrenderMyMenuV2.overrenderEnabled ? DontOverrenderMyMenuV2.newCullingMask : DontOverrenderMyMenuV2.originalCullingMask);
+            //DontOverrenderMyMenuV2.overrenderEnabled = MelonPreferences.GetEntryValue<bool>("DontOverrenderMyMenuV2", "overrenderEnabled");
+            //DontOverrenderMyMenuV2.menuCameraClone.SetActive(DontOverrenderMyMenuV2.overrenderEnabled);
+            //DontOverrenderMyMenuV2.originalCamera.cullingMask = (DontOverrenderMyMenuV2.overrenderEnabled ? DontOverrenderMyMenuV2.newCullingMask : DontOverrenderMyMenuV2.originalCullingMask);
         }
 
         private static void OnRebuild(PlayerNameplate __instance)
@@ -186,7 +216,7 @@ namespace DontOverrenderMyMenuV2
                 {
                     obj.gameObject.layer = newLayer;
                 }
-                foreach (UnityEngine.Object @object in obj)
+                foreach (Il2CppSystem.Object @object in obj)
                 {
                     Transform obj2 = @object.Cast<Transform>();
                     DontOverrenderMyMenuV2.SetLayerRecursively(obj2, newLayer, match);
@@ -205,7 +235,8 @@ namespace DontOverrenderMyMenuV2
         private static int playerLocalLayer;
         private static int playerLayer;
         private static int uiPlayerNameplateLayer = 30;
-        private static string settingsCategory = "DontOverrenderMyMenuV2";
+        //private static string settingsCategory = "DontOverrenderMyMenuV2";
+        //private static bool unchained;
 
     }
 }

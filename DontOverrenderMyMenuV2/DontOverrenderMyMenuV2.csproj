@@ -51,6 +51,10 @@
     <Reference Include="UIExpansionKit">
       <HintPath>D:\VRC_MODDING\VRChat-ML4\Mods\UIExpansionKit.dll</HintPath>
     </Reference>
+    <Reference Include="Unchained.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\VRC_MODDING\VRChat-ML4\Mods\Unchained.Core.dll</HintPath>
+    </Reference>
     <Reference Include="UnhollowerBaseLib">
       <HintPath>D:\VRC_MODDING\VRChat-ML4\MelonLoader\Managed\UnhollowerBaseLib.dll</HintPath>
     </Reference>
