@@ -39,5 +39,4 @@ using DontOverrenderMyMenuV2;
 [assembly: AssemblyFileVersion("0.2.2")]
 [assembly: MelonInfo(typeof(DontOverrenderMyMenuV2.DontOverrenderMyMenuV2), ModInfo.Name, ModInfo.Version, ModInfo.Author, ModInfo.DownloadLink)]
 [assembly: MelonGame("VRChat", "VRChat")]
-//[assembly: MelonAdditionalDependencies("Unchained-Core")]
 
