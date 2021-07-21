@@ -70,10 +70,17 @@
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>D:\VRC_MODDING\VRChat-ML4\MelonLoader\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>D:\VRC_MODDING\VRChat-ML4\MelonLoader\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>D:\VRC_MODDING\VRChat-ML4\MelonLoader\Managed\UnityEngine.UI.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DontOverrenderMyMenuV2.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RubyButtonAPI.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

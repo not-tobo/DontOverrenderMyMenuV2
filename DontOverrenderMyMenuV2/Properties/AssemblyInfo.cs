@@ -35,8 +35,8 @@ using DontOverrenderMyMenuV2;
 // Sie können alle Werte angeben oder Standardwerte für die Build- und Revisionsnummern verwenden,
 // indem Sie "*" wie unten gezeigt eingeben:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.3.3.7")]
-[assembly: AssemblyFileVersion("1.3.3.7")]
+[assembly: AssemblyVersion("0.2.2")]
+[assembly: AssemblyFileVersion("0.2.2")]
 [assembly: MelonInfo(typeof(DontOverrenderMyMenuV2.DontOverrenderMyMenuV2), ModInfo.Name, ModInfo.Version, ModInfo.Author, ModInfo.DownloadLink)]
 [assembly: MelonGame("VRChat", "VRChat")]
 //[assembly: MelonAdditionalDependencies("Unchained-Core")]
