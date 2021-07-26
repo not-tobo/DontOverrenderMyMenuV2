@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using MelonLoader;
 using DontOverrenderMyMenuV2;
+using System;
 
 
 // Allgemeine Informationen über eine Assembly werden über die folgenden
@@ -37,6 +37,7 @@ using DontOverrenderMyMenuV2;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("0.2.2")]
 [assembly: AssemblyFileVersion("0.2.2")]
+[assembly: MelonColor(ConsoleColor.DarkMagenta)]
 [assembly: MelonInfo(typeof(DontOverrenderMyMenuV2.DontOverrenderMyMenuV2), ModInfo.Name, ModInfo.Version, ModInfo.Author, ModInfo.DownloadLink)]
 [assembly: MelonGame("VRChat", "VRChat")]
 
