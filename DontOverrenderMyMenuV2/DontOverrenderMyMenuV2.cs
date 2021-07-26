@@ -208,7 +208,6 @@ namespace DontOverrenderMyMenuV2
 
             if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.O))
             {
-                MelonLogger.Msg("test");
                 if (overrenderEnabled == false)
                 {
                     MelonLogger.Msg(ConsoleColor.DarkMagenta, "Menu Overrrenderer ON");
