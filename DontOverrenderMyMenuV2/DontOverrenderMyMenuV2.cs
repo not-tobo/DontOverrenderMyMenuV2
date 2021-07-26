@@ -15,7 +15,7 @@ namespace DontOverrenderMyMenuV2
     {
         public const string Name = "DontOverrenderMyMenuV2";
         public const string Author = "Topi#1337 [origanal code by Ben]";
-        public const string Version = "0.2.2";
+        public const string Version = "0.2.3";
         public const string DownloadLink = "https://github.com/not-tobo/DontOverrenderMyMenuV2";
     }
 
