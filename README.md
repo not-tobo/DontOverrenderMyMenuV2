@@ -4,6 +4,7 @@ simple Menu Overrenderer ^^
 
 Makes the VRChat Menu's not be able to be overrendered by any shaders or mesh render queue edits :D
 The Toogle Button is in UI Elements Menu, the position can be changed in UIX or in the MelonPreferences file.
+You can also toggle the Overrenderer with "ctrl + o".
 
 The mod uses the [RubyButtonApi](https://github.com/DubyaDude/RubyButtonAPI/blob/master/RubyButtonAPI.cs).
 
