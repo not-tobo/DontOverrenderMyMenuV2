@@ -15,7 +15,7 @@ namespace DontOverrenderMyMenuV2
     {
         public const string Name = "DontOverrenderMyMenuV2";
         public const string Author = "Topi#1337 [origanal code by Ben]";
-        public const string Version = "0.2.4";
+        public const string Version = "0.2.5";
         public const string DownloadLink = "https://github.com/not-tobo/DontOverrenderMyMenuV2";
     }
 
@@ -24,7 +24,8 @@ namespace DontOverrenderMyMenuV2
         public override void OnApplicationStart()
         {
             MelonCoroutines.Start(StartUiManagerInitIEnumerator());
-            MelonLogger.Msg(ConsoleColor.DarkMagenta ,"by Topi#1337 [origanal code by Ben]");
+            MelonCoroutines.Start(WaitForFirstJoin());
+            MelonLogger.Msg(ConsoleColor.DarkMagenta, "by Topi#1337 [origanal code by Ben]");
             MelonLogger.Msg(ConsoleColor.DarkMagenta, "Toggle Hotkey is: ctrl + o [o for overrender]");
         }
 
@@ -35,6 +36,7 @@ namespace DontOverrenderMyMenuV2
 
             VRCUI();
             VRChat_OnUiManagerInit();
+
         }
 
         public void VRCUI()
@@ -44,28 +46,60 @@ namespace DontOverrenderMyMenuV2
             MelonPreferences.CreateCategory(settingsCategory, "DontOverrenderMyMenuV2");
             MelonPreferences.CreateEntry<int>(settingsCategory, "uiMenuX", 2, "UI Elements Button X");
             MelonPreferences.CreateEntry<int>(settingsCategory, "uiMenuY", 2, "UI Elements Button Y");
-            DontOverrenderMyMenuV2.uiMenuX = MelonPreferences.GetEntryValue<int>(settingsCategory, "uiMenuX");
-            DontOverrenderMyMenuV2.uiMenuY = MelonPreferences.GetEntryValue<int>(settingsCategory, "uiMenuY");
+            MelonPreferences.CreateEntry<bool>(settingsCategory, "MenuOverrenderONOFFsaving", MenuOverrenderONOFFsaving, "", null, true);
 
-            MelonLogger.Msg(ConsoleColor.DarkYellow, "X: " + DontOverrenderMyMenuV2.uiMenuX + " Y: " + DontOverrenderMyMenuV2.uiMenuY);
+            MenuOverrenderONOFFsaving = MelonPreferences.GetEntryValue<bool>(settingsCategory, "MenuOverrenderONOFFsaving");
+            uiMenuX = MelonPreferences.GetEntryValue<int>(settingsCategory, "uiMenuX");
+            uiMenuY = MelonPreferences.GetEntryValue<int>(settingsCategory, "uiMenuY");
 
-            var OverrenderButton = new QMToggleButton("UIElementsMenu", DontOverrenderMyMenuV2.uiMenuX, DontOverrenderMyMenuV2.uiMenuY, "Overrender ON", () =>
+            MelonLogger.Msg(ConsoleColor.DarkYellow, "X: " + uiMenuX + " Y: " + uiMenuY);
+
+            var OverrenderButton = new QMToggleButton("UIElementsMenu", uiMenuX, uiMenuY, "Overrender ON", () =>
             {
-                MelonLogger.Msg(ConsoleColor.DarkMagenta, "Menu Overrrenderer ON");
-                overrenderEnabled = true;
-                DontOverrenderMyMenuV2.menuCameraClone.SetActive(DontOverrenderMyMenuV2.overrenderEnabled);
-                DontOverrenderMyMenuV2.originalCamera.cullingMask = (DontOverrenderMyMenuV2.overrenderEnabled ? DontOverrenderMyMenuV2.newCullingMask : DontOverrenderMyMenuV2.originalCullingMask);
+                MenuOverrenderDoStuffOn();
             }, "Overrender OFF", () =>
             {
-                MelonLogger.Msg(ConsoleColor.DarkMagenta, "Menu Overrrenderer OFF");
-                overrenderEnabled = false;
-                DontOverrenderMyMenuV2.menuCameraClone.SetActive(DontOverrenderMyMenuV2.overrenderEnabled);
-                DontOverrenderMyMenuV2.originalCamera.cullingMask = (DontOverrenderMyMenuV2.overrenderEnabled ? DontOverrenderMyMenuV2.newCullingMask : DontOverrenderMyMenuV2.originalCullingMask);
-            }, "Toggle for overrendering the Menu");
+                MenuOverrenderDoStuffOff();
+            }, "Toggle for overrendering the Menu", null, null, false, MenuOverrenderONOFFsaving ? true : false);
 
             MelonLogger.Msg(ConsoleColor.Green, "UI Elements Button Initialized!");
 
             return;
+        }
+
+        private IEnumerator WaitForFirstJoin()
+        {
+            while (RoomManager.field_Internal_Static_ApiWorldInstance_0 == null || RoomManager.field_Internal_Static_ApiWorld_0 == null)
+                yield return null;
+
+            if (MenuOverrenderONOFFsaving == true)
+            {
+                MenuOverrenderDoStuffOn();
+            }
+            else
+            {
+                MenuOverrenderDoStuffOff();
+            }
+        }
+
+        public void MenuOverrenderDoStuffOn()
+        {
+            MelonLogger.Msg(ConsoleColor.DarkMagenta, "Menu Overrrenderer ON");
+            overrenderEnabled = true;
+            MelonPreferences.SetEntryValue(settingsCategory, "MenuOverrenderONOFFsaving", true);
+            MelonPreferences.Save();
+            menuCameraClone.SetActive(overrenderEnabled);
+            originalCamera.cullingMask = (overrenderEnabled ? newCullingMask : originalCullingMask);
+        }
+
+        public void MenuOverrenderDoStuffOff()
+        {
+            MelonLogger.Msg(ConsoleColor.DarkMagenta, "Menu Overrrenderer OFF");
+            overrenderEnabled = false;
+            MelonPreferences.SetEntryValue(settingsCategory, "MenuOverrenderONOFFsaving", false);
+            MelonPreferences.Save();
+            menuCameraClone.SetActive(overrenderEnabled);
+            originalCamera.cullingMask = (overrenderEnabled ? newCullingMask : originalCullingMask);
         }
 
         public static void VRChat_OnUiManagerInit()
@@ -80,25 +114,25 @@ namespace DontOverrenderMyMenuV2
                 bool flag2 = !field_Public_Camera_;
                 if (!flag2)
                 {
-                    DontOverrenderMyMenuV2.originalCamera = field_Public_Camera_;
-                    DontOverrenderMyMenuV2.originalCullingMask = field_Public_Camera_.cullingMask;
+                    originalCamera = field_Public_Camera_;
+                    originalCullingMask = field_Public_Camera_.cullingMask;
                     field_Public_Camera_.cullingMask = (field_Public_Camera_.cullingMask & ~(1 << LayerMask.NameToLayer("UiMenu")) & ~(1 << LayerMask.NameToLayer("UI")));
-                    field_Public_Camera_.cullingMask |= 1 << DontOverrenderMyMenuV2.uiPlayerNameplateLayer;
-                    DontOverrenderMyMenuV2.newCullingMask = field_Public_Camera_.cullingMask;
-                    DontOverrenderMyMenuV2.menuCameraClone = new GameObject();
-                    DontOverrenderMyMenuV2.menuCameraClone.transform.parent = field_Public_Camera_.transform.parent;
-                    DontOverrenderMyMenuV2.menuCameraUI = DontOverrenderMyMenuV2.menuCameraClone.AddComponent<Camera>();
-                    DontOverrenderMyMenuV2.menuCameraUI.cullingMask = (1 << LayerMask.NameToLayer("UiMenu") | 1 << LayerMask.NameToLayer("UI"));
-                    DontOverrenderMyMenuV2.menuCameraUI.clearFlags = (CameraClearFlags)3;
-                    DontOverrenderMyMenuV2.uiLayer = LayerMask.NameToLayer("UI");
-                    DontOverrenderMyMenuV2.uiMenuLayer = LayerMask.NameToLayer("UiMenu");
-                    DontOverrenderMyMenuV2.playerLocalLayer = LayerMask.NameToLayer("PlayerLocal");
-                    DontOverrenderMyMenuV2.playerLayer = LayerMask.NameToLayer("Player");
+                    field_Public_Camera_.cullingMask |= 1 << uiPlayerNameplateLayer;
+                    newCullingMask = field_Public_Camera_.cullingMask;
+                    menuCameraClone = new GameObject();
+                    menuCameraClone.transform.parent = field_Public_Camera_.transform.parent;
+                    menuCameraUI = menuCameraClone.AddComponent<Camera>();
+                    menuCameraUI.cullingMask = (1 << LayerMask.NameToLayer("UiMenu") | 1 << LayerMask.NameToLayer("UI"));
+                    menuCameraUI.clearFlags = (CameraClearFlags)3;
+                    uiLayer = LayerMask.NameToLayer("UI");
+                    uiMenuLayer = LayerMask.NameToLayer("UiMenu");
+                    playerLocalLayer = LayerMask.NameToLayer("PlayerLocal");
+                    playerLayer = LayerMask.NameToLayer("Player");
                     GameObject gameObject = GameObject.Find("/UserInterface/MenuContent/Popups/LoadingPopup/3DElements/LoadingInfoPanel");
-                    DontOverrenderMyMenuV2.SetLayerRecursively(gameObject.transform, DontOverrenderMyMenuV2.uiMenuLayer, -1);
+                    SetLayerRecursively(gameObject.transform, uiMenuLayer, -1);
                     GameObject gameObject2 = GameObject.Find("/_Application/TrackingVolume/PlayerObjects/UserCamera");
-                    DontOverrenderMyMenuV2.SetLayerRecursively(gameObject2.transform, DontOverrenderMyMenuV2.playerLocalLayer, DontOverrenderMyMenuV2.uiLayer);
-                    DontOverrenderMyMenuV2.SetLayerRecursively(gameObject2.transform, DontOverrenderMyMenuV2.playerLocalLayer, DontOverrenderMyMenuV2.uiMenuLayer);
+                    SetLayerRecursively(gameObject2.transform, playerLocalLayer, uiLayer);
+                    SetLayerRecursively(gameObject2.transform, playerLocalLayer, uiMenuLayer);
                     HarmonyLib.Harmony harmonyInstance = new HarmonyLib.Harmony("DontOverrenderMyMenuV2");
                     (from m in typeof(VRCUiBackgroundFade).GetMethods(BindingFlags.Instance | BindingFlags.Public)
                      where m.Name.Contains("Method_Public_Void_Single_Action") && !m.Name.Contains("PDM")
@@ -119,9 +153,9 @@ namespace DontOverrenderMyMenuV2
                          harmonyInstance.Patch(m, new HarmonyMethod(typeof(DontOverrenderMyMenuV2).GetMethod("OnRebuild", BindingFlags.Static | BindingFlags.NonPublic)), null, null);
                      });
 
-                    DontOverrenderMyMenuV2.overrenderEnabled = MelonPreferences.GetEntryValue<bool>("DontOverrenderMyMenuV2", "overrenderEnabled");
-                    DontOverrenderMyMenuV2.menuCameraClone.SetActive(DontOverrenderMyMenuV2.overrenderEnabled);
-                    DontOverrenderMyMenuV2.originalCamera.cullingMask = (DontOverrenderMyMenuV2.overrenderEnabled ? DontOverrenderMyMenuV2.newCullingMask : DontOverrenderMyMenuV2.originalCullingMask);
+                    overrenderEnabled = MelonPreferences.GetEntryValue<bool>("DontOverrenderMyMenuV2", "overrenderEnabled");
+                    menuCameraClone.SetActive(overrenderEnabled);
+                    originalCamera.cullingMask = (overrenderEnabled ? newCullingMask : originalCullingMask);
 
                     MelonLogger.Msg(ConsoleColor.Green, "Overrenderer Initialized!");
                 }
@@ -130,15 +164,15 @@ namespace DontOverrenderMyMenuV2
 
         public override void OnUpdate()
         {
-            bool flag = DontOverrenderMyMenuV2.menuCameraClone != null && DontOverrenderMyMenuV2.menuCameraClone.activeSelf;
+            bool flag = menuCameraClone != null && menuCameraClone.activeSelf;
             if (flag)
             {
-                DontOverrenderMyMenuV2.menuCameraClone.transform.localPosition = DontOverrenderMyMenuV2.originalCamera.transform.localPosition;
-                bool flag2 = DontOverrenderMyMenuV2.menuCameraUI != null;
+                menuCameraClone.transform.localPosition = originalCamera.transform.localPosition;
+                bool flag2 = menuCameraUI != null;
                 if (flag2)
                 {
-                    DontOverrenderMyMenuV2.menuCameraUI.nearClipPlane = DontOverrenderMyMenuV2.originalCamera.nearClipPlane;
-                    DontOverrenderMyMenuV2.menuCameraUI.farClipPlane = DontOverrenderMyMenuV2.originalCamera.farClipPlane;
+                    menuCameraUI.nearClipPlane = originalCamera.nearClipPlane;
+                    menuCameraUI.farClipPlane = originalCamera.farClipPlane;
                 }
             }
             KeyUpdate();
@@ -146,37 +180,38 @@ namespace DontOverrenderMyMenuV2
 
         private static void OnRebuild(PlayerNameplate __instance)
         {
-            bool flag = DontOverrenderMyMenuV2.overrenderEnabled && __instance != null && __instance.gameObject.layer != DontOverrenderMyMenuV2.uiPlayerNameplateLayer;
+            bool flag = overrenderEnabled && __instance != null && __instance.gameObject.layer != uiPlayerNameplateLayer;
             if (flag)
             {
-                DontOverrenderMyMenuV2.SetLayerRecursively(__instance.transform.parent.parent.parent, DontOverrenderMyMenuV2.uiPlayerNameplateLayer, DontOverrenderMyMenuV2.uiMenuLayer);
-                DontOverrenderMyMenuV2.SetLayerRecursively(__instance.transform.parent.parent.parent, DontOverrenderMyMenuV2.uiPlayerNameplateLayer, DontOverrenderMyMenuV2.uiLayer);
+                SetLayerRecursively(__instance.transform.parent.parent.parent, uiPlayerNameplateLayer, uiMenuLayer);
+                SetLayerRecursively(__instance.transform.parent.parent.parent, uiPlayerNameplateLayer, uiLayer);
             }
         }
 
         private static void OnAvatarScale(ref SimpleAvatarPedestal __instance, GameObject __0)
         {
-            bool flag = DontOverrenderMyMenuV2.overrenderEnabled && __instance != null && __0 != null;
+            bool flag = overrenderEnabled && __instance != null && __0 != null;
             if (flag)
             {
                 bool flag2 = __0.transform.parent.gameObject.name.Equals("AvatarModel");
                 if (flag2)
                 {
-                    DontOverrenderMyMenuV2.SetLayerRecursively(__0.transform.parent, DontOverrenderMyMenuV2.uiMenuLayer, DontOverrenderMyMenuV2.playerLocalLayer);
+                    SetLayerRecursively(__0.transform.parent, uiMenuLayer, playerLocalLayer);
                 }
                 else
                 {
-                    DontOverrenderMyMenuV2.SetLayerRecursively(__0.transform, DontOverrenderMyMenuV2.uiMenuLayer, DontOverrenderMyMenuV2.playerLocalLayer);
+                    SetLayerRecursively(__0.transform, uiMenuLayer, playerLocalLayer);
                 }
             }
         }
+
         private static void OnFade()
         {
-            bool flag = DontOverrenderMyMenuV2.menuCameraClone != null;
+            bool flag = menuCameraClone != null;
             if (flag)
             {
-                DontOverrenderMyMenuV2.menuCameraUI.clearFlags = (CameraClearFlags)3;
-                foreach (PostProcessLayer postProcessLayer in DontOverrenderMyMenuV2.menuCameraClone.GetComponents<PostProcessLayer>())
+                menuCameraUI.clearFlags = (CameraClearFlags)3;
+                foreach (PostProcessLayer postProcessLayer in menuCameraClone.GetComponents<PostProcessLayer>())
                 {
                     UnityEngine.Object.Destroy(postProcessLayer);
                 }
@@ -196,7 +231,7 @@ namespace DontOverrenderMyMenuV2
                 foreach (Il2CppSystem.Object @object in obj)
                 {
                     Transform obj2 = @object.Cast<Transform>();
-                    DontOverrenderMyMenuV2.SetLayerRecursively(obj2, newLayer, match);
+                    SetLayerRecursively(obj2, newLayer, match);
                 }
             }
         }
@@ -210,17 +245,11 @@ namespace DontOverrenderMyMenuV2
             {
                 if (overrenderEnabled == false)
                 {
-                    MelonLogger.Msg(ConsoleColor.DarkMagenta, "Menu Overrrenderer ON");
-                    overrenderEnabled = true;
-                    DontOverrenderMyMenuV2.menuCameraClone.SetActive(DontOverrenderMyMenuV2.overrenderEnabled);
-                    DontOverrenderMyMenuV2.originalCamera.cullingMask = (DontOverrenderMyMenuV2.overrenderEnabled ? DontOverrenderMyMenuV2.newCullingMask : DontOverrenderMyMenuV2.originalCullingMask);
+                    MenuOverrenderDoStuffOn();
                 }
                 else
                 {
-                    MelonLogger.Msg(ConsoleColor.DarkMagenta, "Menu Overrrenderer OFF");
-                    overrenderEnabled = false;
-                    DontOverrenderMyMenuV2.menuCameraClone.SetActive(DontOverrenderMyMenuV2.overrenderEnabled);
-                    DontOverrenderMyMenuV2.originalCamera.cullingMask = (DontOverrenderMyMenuV2.overrenderEnabled ? DontOverrenderMyMenuV2.newCullingMask : DontOverrenderMyMenuV2.originalCullingMask);
+                    MenuOverrenderDoStuffOff();
                 }
             }
         }
@@ -239,5 +268,6 @@ namespace DontOverrenderMyMenuV2
         private static string settingsCategory = "DontOverrenderMyMenuV2";
         private static int uiMenuX;
         private static int uiMenuY;
+        private static bool MenuOverrenderONOFFsaving;
     }
 }
